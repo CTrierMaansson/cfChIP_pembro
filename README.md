@@ -13,7 +13,7 @@ These environments can ve installed using
 
 ```{bash}
 is this bash?
-´´´
+```
 
 Something about the conda environment
 
