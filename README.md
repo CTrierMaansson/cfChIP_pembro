@@ -6,8 +6,8 @@ By Christoffer Trier Maansson et al. (2026)
 
 ## Environments
 The data is analyzed using two conda environments
-    1. cfchip_pembro - Main environment for raw data processing
-    2. cfchip_ichor - Environment to run IchorCNA on cfChIP-seq background reads
+1. cfchip_pembro - Main environment for raw data processing
+2. cfchip_ichor - Environment to run IchorCNA on cfChIP-seq background reads
 
 These environments can ve installed using 
 
