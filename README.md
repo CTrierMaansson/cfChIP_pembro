@@ -7,7 +7,7 @@ By Christoffer Trier Maansson et al. (2026)
 ## Table of contents
 - [Environments](#Environments)
 - [Content](#Content)
-- [Running code](#Running code)
+- [Code](#Code)
 
 ## Environments
 The data is analyzed using two conda environments
@@ -37,7 +37,7 @@ results for the manuscripts.
 ### Reference data
 Here is some info about the files in reference because they require more info
 
-## Running code
+## Code
 
 Three bash scripts will create the files used for downstream analyses.
 
