@@ -27,6 +27,7 @@ mkdir -p $home_dir/reduced_fragments
 mkdir -p $home_dir/enrichment_ratios
 mkdir -p $home_dir/bigwig
 mkdir -p $home_dir/bedgraph
+mkdir -p $home_dir/coverage
 mkdir -p $home_dir/fragment_lengths
 
 input_R1_file="${sample}_R1.fastq"
@@ -243,6 +244,13 @@ hmftools_bedgraph_file="${sample}.bedgraph"
 bigWigToBedGraph \
     $home_dir/bigwig/$hmftools_bigwig_file \
     $home_dir/bedgraph/$hmftools_bedgraph_file
+    
+echo "## Getting TSS coverage across genes"
+
+Rscript 
+    --vanilla 
+    $R_script_paths/MANE_coverage.R \
+    $home_dir/bedgraph/$hmftools_bedgraph_file 
     
 echo "## Getting fragment lengths"
 

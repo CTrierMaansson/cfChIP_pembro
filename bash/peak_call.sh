@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --partition normal
-#SBATCH --mem-per-cpu 32G
+#SBATCH --mem-per-cpu 10G
 #SBATCH -c 1
 #SBATCH --output=logs/peak_call%j.out
-#SBATCH --time=36:00:00
+#SBATCH --time=08:00:00
 #SBATCH --array=0-59
 
 
@@ -19,17 +19,32 @@ eval "$(conda shell.bash hook)"
 conda activate cfChIP_pembro
 
 mkdir -p $home_dir/macs
+mkdir -p $home_dir/macs/$sample
+mkdir -p $home_dir/macs/annotated
 
-cfChIP_file="${files[$SLURM_ARRAY_TASK_ID]}_bowtie_hmftools_rmdup.bam"
+cfChIP_file="${sample}_rmdup.bam"
 
-cfChIP_directory="${files[$SLURM_ARRAY_TASK_ID]}_bowtie"
+echo "This is the peak calling of ${cfChIP_file}"
 
-output_path="/home/ctriermaansson/alabs_projects/Christoffer/PeterMac/PMCC_Chris/macs/no_input"
+macs2 callpeak \
+    -t $home_dir/alignment/$cfChIP_file \
+    -g hs \
+    --keep-dup all \
+    --outdir $home_dir/macs/$sample \
+    -n $sample \
+    -B \
+    -q 0.1 \
+    --broad 
 
-sample_name="${files[$SLURM_ARRAY_TASK_ID]}_no_input"
+peak_file="${sample}_peaks.broadPeak"
 
-echo "This is the peak calling of ${cfChIP_file} without input files"
+echo "Annotating peaks"
 
+#The R scripts are available at:
+#https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/
+R_script_paths="path/to/R_scripts"
 
-
-macs2 callpeak -t alignment/$cfChIP_directory/$cfChIP_file -g hs --keep-dup all --outdir $output_path/$sample -n $sample_name -B -q 0.1 --broad 
+Rscript 
+    --vanilla 
+    $R_script_paths/annotate_peaks.R \
+    $home_dir/macs/$sample/$peak_file
