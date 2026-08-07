@@ -29,8 +29,8 @@ usage() {
     echo "  -R PATH   Path to R scripts (https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/)"
     echo "  -g PATH   Path to indexed reference genome which also contain the genome FASTA"
     echo "  -p CHARACTER   Prefix of indexed genome, <prefix>.fa, from bowtie2-build"
-    echo "  -b PATH   Path to fgbio (https://github.com/fulcrumgenomics/fgbio/releases)"
-    echo "  -m PATH   Path to hmftools (https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0)"
+    echo "  -b PATH   Path to fgbio .jar file (https://github.com/fulcrumgenomics/fgbio/releases)"
+    echo "  -m PATH   Path to hmftools .jar file (https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0)"
     echo "  -h        Show this help message"
 }
 
@@ -83,8 +83,6 @@ while getopts ":s:o:f:F:r:R:g:p:b:m:h" opt; do
             ;;
     esac
 done
-
-echo $genome_prefix
 
 if [[ -z "$sample" ||
       -z "$home_dir" ||
@@ -226,7 +224,7 @@ mkdir -p $home_dir/fragment_lengths
 
 echo "## Running pre trimming fastQC"
 
-fastqc
+fastqc \
     -o $home_dir/fastqc/ \
     -f fastq \
     $fastq1 \
@@ -250,6 +248,8 @@ sample2="${filename2%.fastq}"
 trimmed_R1_file="${sample1}_val_1.fq"
 trimmed_R2_file="${sample2}_val_2.fq"
 sam_file="${sample}.sam"
+
+echo "## Aligning reads to ${genome_prefix}"
 
 bowtie2 \
     --no-mixed \
@@ -427,7 +427,7 @@ bigWigToBedGraph \
 echo "## Getting TSS coverage across genes"
 
 
-Rscript 
+Rscript \
     --vanilla 
     $R_script_paths/MANE_coverage.R \
     $home_dir/bedgraph/$hmftools_bedgraph_file 
@@ -435,7 +435,7 @@ Rscript
 echo "## Getting fragment lengths"
 
 
-Rscript 
+Rscript \
     --vanilla 
     $R_script_paths/export_fragment_lengths.R \
     $home_dir/alignment/$hmftools_rmdup_nosort_file \

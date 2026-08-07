@@ -19,11 +19,11 @@ These environments can be installed using
 ```{bash}
 conda env create \
     -n cfchip_pembro \
-    -f /cfChIP_pembro/cfchip_pembro.yml
+    -f /cfChIP_pembro/cfChIP_pembro.yml
 
 conda env create \
     -n cfchip_ichor \
-    -f /cfChIP_pembro/cfchip_ichor.yml
+    -f /cfChIP_pembro/cfChIP_ichor.yml
 ```
 
 ## Content
