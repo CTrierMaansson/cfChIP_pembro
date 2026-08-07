@@ -49,7 +49,7 @@ sbatch /cfChIP_pembro/bash/preprocessing.sh
 
 ```
 
-### result directory structure
+### Result directory structure
 
 Here I want the tree of the result directory
 

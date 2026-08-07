@@ -4,16 +4,209 @@
 #SBATCH -c 1
 #SBATCH --output=logs/preprocess%j.out
 #SBATCH --time=36:00:00
-#SBATCH --array=0-59
 
 
-files=("Donor1" "Donor2" "Donor3" "Donor4" "Donor5" "Donor6" "pt03_BL" "pt03_w6" "pt04_BL" "pt04_w6" "pt06_BL" "pt06_w9" "pt08_BL" "pt08_w9" "pt09_BL" "pt09_w6" "pt11_BL" "pt11_w6" "pt12_BL" "pt12_w6" "pt16_BL" "pt16_w6" "pt19_BL" "pt19_w6" "pt21_BL" "pt21_w3" "pt22_BL" "pt22_w6" "pt23_BL" "pt23_w9" "pt24_BL" "pt24_w6" "pt25_BL" "pt25_w6" "pt26_BL" "pt26_w6" "pt28_BL" "pt28_w9" "pt29_BL" "pt29_w6" "pt31_BL" "pt31_w9" "pt33_BL" "pt33_w6" "pt36_BL" "pt36_w6" "pt37_BL" "pt37_w6" "pt38_BL" "pt38_w6" "pt39_BL" "pt39_w6" "pt41_BL" "pt41_w3" "pt45_BL" "pt45_w6" "pt46_BL" "pt46_w6" "pt49_BL" "pt49_w6")
+sample=""
+home_dir=""
+fastq1=""
+fastq2=""
+reference_path=""
+R_script_paths=""
+genome_path=""
+genome_prefix=""
+fgbio_path=""
+hmftools_path=""
 
-home_dir="/define/home/directory"
+usage() {
+    echo "Usage: $0 Required arguments: -s SAMPLE_NAME -o OUTPUT_DIRECTORY -f FASTQ_R1_PATH -F FASTQ_R1_PATH -r REFERENCE_PATH -R R_PATH -g GENOME_PATH -p GENOME_PREFIX -b FGBIO_PATH -m HMFTOOLS_PATH"
+    echo
+    echo "Options:"
+    echo "  -s SAMPLE   Sample name"
+    echo "  -o DIRECTORY   Output directory"
+    echo "  -f PATH   Path to uncompressed fastq R1"
+    echo "  -F PATH   Path to uncompressed fastq R2"
+    echo "  -r PATH   Path to reference data (https://github.com/CTrierMaansson/cfChIP_pembro/reference/)"
+    echo "  -R PATH   Path to R scripts (https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/)"
+    echo "  -g PATH   Path to indexed reference genome which also contain the genome FASTA"
+    echo "  -p CHARACTER   Prefix of indexed genome, <prefix>.fa, from bowtie2-build"
+    echo "  -b PATH   Path to fgbio (https://github.com/fulcrumgenomics/fgbio/releases)"
+    echo "  -m PATH   Path to hmftools (https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0)"
+    echo "  -h        Show this help message"
+}
 
-sample="${files[$SLURM_ARRAY_TASK_ID]}"
 
-echo "# This is the preprocssing of the following sample: ${sample}"
+while getopts ":s:o:f:F:r:R:g:p:b:m:h" opt; do
+    case "$opt" in
+        s)
+            sample="$OPTARG"
+            ;;
+        o)
+            home_dir="$OPTARG"
+            ;;
+        f)
+            fastq1="$OPTARG"
+            ;;
+        F)
+            fastq2="$OPTARG"
+            ;;
+        r)
+            reference_path="$OPTARG"
+            ;;
+        R)
+            R_script_paths="$OPTARG"
+            ;;
+        g)
+            genome_path="$OPTARG"
+            ;;
+        p)
+            genome_prefix="$OPTARG"
+            ;;
+        b)
+            fgbio_path="$OPTARG"
+            ;;
+        m)
+            hmftools_path="$OPTARG"
+            ;;
+
+        h)
+            usage
+            exit 0
+            ;;
+        :)
+            echo "Error: option -$OPTARG requires a value" >&2
+            exit 1
+            ;;
+        \?)
+            echo "Error: unknown option -$OPTARG" >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+echo $genome_prefix
+
+if [[ -z "$sample" ||
+      -z "$home_dir" ||
+      -z "$fastq1" ||
+      -z "$fastq2" ||
+      -z "$reference_path" ||
+      -z "$R_script_paths" ||
+      -z "$genome_path" || 
+      -z "$genome_prefix" ||
+      -z "$fgbio_path" || 
+      -z "$hmftools_path" ]]; then
+    echo "Usage: $0 Required arguments: -s SAMPLE_NAME -o OUTPUT_DIRECTORY -f FASTQ_R1_PATH -F FASTQ_R1_PATH -r REFERENCE_PATH -R R_PATH -g GENOME_PATH -p GENOME_PREFIX -b FGBIO_PATH -m HMFTOOLS_PATH"
+    exit 1
+fi
+
+# Reject compressed FASTQ files
+if [[ "$fastq1" == *.gz ]]; then
+    echo "Error: R1 input must not be gzipped: $fastq1" >&2
+    exit 1
+fi
+
+if [[ "$fastq2" == *.gz ]]; then
+    echo "Error: R2 input must not be gzipped: $fastq2" >&2
+    exit 1
+fi
+
+
+require_file() {
+    local path="$1"
+    local option="$2"
+
+    if [[ ! -f "$path" ]]; then
+        echo "Error: $option must point to an existing regular file: $path" >&2
+        exit 1
+    fi
+}
+
+require_dir() {
+    local path="$1"
+    local option="$2"
+
+    if [[ ! -d "$path" ]]; then
+        echo "Error: $option must point to an existing directory: $path" >&2
+        exit 1
+    fi
+}
+fasta="${genome_prefix}.fa"
+
+echo "Testing whether input files can be found"
+echo "fastq_R1: ${fastq1}"
+echo "fastq_R2: ${fastq2}"
+echo "Reference genome FASTA: ${genome_path}/${fasta}"
+echo "Reference whitelist: ${reference_path}/Hg38WhitelistV2.bed"
+echo "Reference chromosome sizes: ${reference_path}/hg38_size.bed"
+echo "H3K4me3 on-target file: ${reference_path}/H3K4me3_targets_reduced.bed"
+echo "H3K4me3 off-target file: ${reference_path}/H3K4me3_offtargets_reduced.bed"
+echo "Fragment length R script: ${R_script_paths}/export_fragment_lengths.R"
+echo "Enrichment ratio R script: ${R_script_paths}/Enrich_ratio_script.R"
+echo "TSS coverage R script: ${R_script_paths}/MANE_coverage.R"
+echo "fgbio.jar file: ${fgbio_path}"
+echo "hmftools.jar file: ${hmftools_path}"
+
+require_file "$fastq1" "-f"
+require_file "$fastq2" "-F"
+require_file "$fgbio_path" "-b"
+require_file "$hmftools_path" "-m"
+
+require_dir "$home_dir" "-o"
+require_dir "$reference_path" "-r"
+require_dir "$R_script_paths" "-R"
+require_dir "$genome_path" "-g"
+
+if [[ ! -f "$genome_path/$fasta" ]]; then
+        echo "Error: $fasta cannot be found in : $genome_path" >&2
+        exit 1
+fi
+
+#The hg38 whitelist and other reference data 
+#used for this manuscript is available at:
+#https://github.com/CTrierMaansson/cfChIP_pembro/reference/
+
+if [[ ! -f "$reference_path/Hg38WhitelistV2.bed" ]]; then
+    echo "Error: Hg38WhitelistV2.bed cannot be found in: $reference_path" >&2
+    exit 1
+fi
+
+if [[ ! -f "$reference_path/hg38_size.bed" ]]; then
+    echo "Error: hg38_size.bed cannot be found in: $reference_path" >&2
+    exit 1
+fi
+
+if [[ ! -f "$reference_path/H3K4me3_offtargets_reduced.bed" ]]; then
+    echo "Error: H3K4me3_offtargets_reduced.bed cannot be found in: $reference_path" >&2
+    exit 1
+fi
+
+if [[ ! -f "$reference_path/H3K4me3_targets_reduced.bed" ]]; then
+    echo "Error: H3K4me3_targets_reduced.bed cannot be found in: $reference_path" >&2
+    exit 1
+fi
+
+#The R scripts are available at:
+#https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/
+
+if [[ ! -f "$R_script_paths/export_fragment_lengths.R" ]]; then
+    echo "Error: export_fragment_lengths.R cannot be found in: $R_script_paths" >&2
+    exit 1
+fi
+
+if [[ ! -f "$R_script_paths/Enrich_ratio_script.R" ]]; then
+    echo "Error: Enrich_ratio_script.R cannot be found in: $R_script_paths" >&2
+    exit 1
+fi
+
+if [[ ! -f "$R_script_paths/MANE_coverage.R" ]]; then
+    echo "Error: MANE_coverage.R cannot be found in: $R_script_paths" >&2
+    exit 1
+fi
+
+echo "# This is the preprocessing of the following sample: ${sample}"
+
+echo "# Exporting results to ${home_dir}"
 
 eval "$(conda shell.bash hook)"
 conda activate cfChIP_pembro
@@ -30,17 +223,14 @@ mkdir -p $home_dir/bedgraph
 mkdir -p $home_dir/coverage
 mkdir -p $home_dir/fragment_lengths
 
-input_R1_file="${sample}_R1.fastq"
-input_R2_file="${sample}_R2.fastq"
 
 echo "## Running pre trimming fastQC"
-fastq_path="path/to/fastq"
 
 fastqc
     -o $home_dir/fastqc/ \
     -f fastq \
-    $fastq_path/$input_R1_file \
-    $fastq_path/$input_R2_file
+    $fastq1 \
+    $fastq2
 
 echo "## Running fastq trimming"
 
@@ -48,20 +238,24 @@ trim_galore \
     --fastqc \
     --fastqc_args "--outdir ${home_dir}/trimmed_fastqs/fastqc/" \
     --paired \
-    -o trimmed_fastqs \
-    $fastq_path/$input_R1_file \
-    $fastq_path/$input_R2_file
+    -o $home_dir/trimmed_fastqs \
+    $fastq1 \
+    $fastq2
 
-trimmed_R1_file="${sample}_R1_val_1.fq"
-trimmed_R2_file="${sample}_R2_val_2.fq"
+filename1="${fastq1##*/}"
+sample1="${filename1%.fastq}"
+filename2="${fastq2##*/}"
+sample2="${filename2%.fastq}"
+
+trimmed_R1_file="${sample1}_val_1.fq"
+trimmed_R2_file="${sample2}_val_2.fq"
 sam_file="${sample}.sam"
-reference_path="path/to/reference"
 
 bowtie2 \
     --no-mixed \
     --no-discordant \
     --phred33 \
-    -x $reference_path \
+    -x $genome_path/$genome_prefix \
     -p 4 \
     -1 $home_dir/trimmed_fastqs/$trimmed_R1_file \
     -2 $home_dir/trimmed_fastqs/$trimmed_R2_file \
@@ -71,13 +265,9 @@ bam_file="${sample}.bam"
 
 echo "## Creating BAM file"
 
-white_list="path/to/whitelist.bed"
-#The hg38 whitelist used for this manuscript is available at
-#https://github.com/CTrierMaansson/cfChIP_pembro/reference/
-
 samtools view \
     -b \
-    -L $white_list \
+    -L $reference_path/Hg38WhitelistV2.bed \
     -o $home_dir/alignment/$bam_file \
     $home_dir/alignment/$sam_file
 
@@ -93,8 +283,6 @@ samtools sort \
 echo "## Copying UMIs"
 
 annotate_file="${sample}_sorted_annotated.bam"
-fgbio_path="path/to/fgbio.jar"
-#We downloaded fgbio from https://github.com/fulcrumgenomics/fgbio/releases
 
 java \ 
     -Xmx32g \
@@ -130,17 +318,14 @@ samtools index \
 echo "## Running hmftools UMI deduplication"
 #At the time of the creation of this pipeline the UMI deduplication tool
 #from hmftools was called mark-dups. It has since been renamed redux
-#which is available from:
-#https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0
 
-hmftools_path="path/to/hmftools"
 hmftools_unsorted_file="${sample}_hmftools_unsort.bam"
 
 java \
     -jar $hmftools_path \
     -bam_file $home_dir/alignment/$proper_paired_file \
     -sample $sample \
-    -ref_genome $reference_path/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna \
+    -ref_genome $genome_path/$fasta \
     -ref_genome_version V38 \
     -output_bam $home_dir/alignment/$hmftools_unsorted_file \
     -output_dir alignment/ \
@@ -196,19 +381,13 @@ bedtools \
     > $home_dir/bed/$hmftools_bed_file 
 
 echo "## Creating 1bp BED files and calculating enrichment ratios"
-#The R scripts are available at:
-#https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/
-R_script_paths="path/to/R_scripts"
-#The regions defined as on_target and off_target regions of H3K4me3
-#are available at:
-#https://github.com/CTrierMaansson/cfChIP_pembro/reference/
-target_path="path/to/reference/"
+
 
 Rscript \
     --vanilla \
     $R_script_paths/Enrich_ratio_script.R \
     $home_dir/bed/$hmftools_bed_file \
-    $target_path
+    $reference_path
 
 echo "## Adding enrichment ratio to document"
 hmftools_ratio_file="${sample}_rmdup_enrichment_ratio.txt"
@@ -247,6 +426,7 @@ bigWigToBedGraph \
     
 echo "## Getting TSS coverage across genes"
 
+
 Rscript 
     --vanilla 
     $R_script_paths/MANE_coverage.R \
@@ -254,11 +434,12 @@ Rscript
     
 echo "## Getting fragment lengths"
 
+
 Rscript 
     --vanilla 
     $R_script_paths/export_fragment_lengths.R \
     $home_dir/alignment/$hmftools_rmdup_nosort_file \
-    $white_list
+    $reference_path/hg38_size.bed
 
 echo "# Preprocessing DONE"
 
