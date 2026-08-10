@@ -1,7 +1,6 @@
 args = commandArgs(trailingOnly=TRUE)
 
 bedgraph_sample <- args[1]
-bedgraph_sample <- "/faststorage/project/alabs_projects/Christoffer/PeterMac/PMCC_Chris/bedgraph/pt04_w6.bedgraph"
 
 bname <- basename(bedgraph_sample)
 patient_short <- gsub(".bedgraph","",bname)
@@ -93,4 +92,5 @@ print("Writting TSS profile file")
 write.table(patient_df, 
             file = paste0(root_path,"coverage/",patient_short,"_H3K4me3_MANE_TSS_coverage.txt"), 
             sep = "\t",
-            col.names = T)
+            col.names = T,
+            row.names = F)

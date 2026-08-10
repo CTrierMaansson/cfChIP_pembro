@@ -27,7 +27,7 @@ usage() {
     echo "  -F PATH   Path to uncompressed fastq R2"
     echo "  -r PATH   Path to reference data (https://github.com/CTrierMaansson/cfChIP_pembro/reference/)"
     echo "  -R PATH   Path to R scripts (https://github.com/CTrierMaansson/cfChIP_pembro/R/scripts/)"
-    echo "  -g PATH   Path to indexed reference genome which also contain the genome FASTA"
+    echo "  -g PATH   Path to bowtie indexed reference genome which also contain the genome FASTA and genome dictionary created with picard CreateSequenceDictionary"
     echo "  -p CHARACTER   Prefix of indexed genome, <prefix>.fa, from bowtie2-build"
     echo "  -b PATH   Path to fgbio .jar file (https://github.com/fulcrumgenomics/fgbio/releases)"
     echo "  -m PATH   Path to hmftools .jar file (https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0)"
@@ -202,6 +202,8 @@ if [[ ! -f "$R_script_paths/MANE_coverage.R" ]]; then
     exit 1
 fi
 
+echo "Test successful"
+
 echo "# This is the preprocessing of the following sample: ${sample}"
 
 echo "# Exporting results to ${home_dir}"
@@ -284,7 +286,7 @@ echo "## Copying UMIs"
 
 annotate_file="${sample}_sorted_annotated.bam"
 
-java \ 
+java \
     -Xmx32g \
     -XX:+AggressiveHeap\
     -jar $fgbio_path \
@@ -328,14 +330,14 @@ java \
     -ref_genome $genome_path/$fasta \
     -ref_genome_version V38 \
     -output_bam $home_dir/alignment/$hmftools_unsorted_file \
-    -output_dir alignment/ \
+    -output_dir $home_dir/alignment/ \
     -write_stats \
     -umi_enabled \
     -umi_base_diff_stats 
 
 echo "## Moving UMI stat files"
 
-mv alignment/*tsv* umi_stats/
+mv $home_dir/alignment/*tsv* $home_dir/umi_stats/
 
 echo "## Sorting hmftools file"
 
@@ -378,7 +380,7 @@ bedtools \
     bamtobed \
     -bedpe \
     -i $home_dir/alignment/$hmftools_mate_file \
-    > $home_dir/bed/$hmftools_bed_file 
+    > $home_dir/bed/$hmftools_bed_file
 
 echo "## Creating 1bp BED files and calculating enrichment ratios"
 
@@ -387,18 +389,18 @@ Rscript \
     --vanilla \
     $R_script_paths/Enrich_ratio_script.R \
     $home_dir/bed/$hmftools_bed_file \
-    $reference_path
+    $reference_path/
 
 echo "## Adding enrichment ratio to document"
 hmftools_ratio_file="${sample}_rmdup_enrichment_ratio.txt"
-hmftools_values="$(sed enrichment_ratios/$hmftools_ratio_file -n -e 2p | awk '{print $2}')"
+hmftools_values="$(sed $home_dir/enrichment_ratios/$hmftools_ratio_file -n -e 2p | awk '{print $2}')"
 
 if [[ ! -e $home_dir/enrichment_ratios/enrichment_ratios.txt ]]; then
     touch $home_dir/enrichment_ratios/enrichment_ratios.txt
-    echo "ratios"  "sample" >> enrichment_ratios/enrichment_ratios.txt 
+    echo "ratios"  "sample" >> $home_dir/enrichment_ratios/enrichment_ratios.txt 
 fi
 
-echo $hmftools_values  $sample >> enrichment_ratios/enrichment_ratios.txt 
+echo $hmftools_values  $sample >> $home_dir/enrichment_ratios/enrichment_ratios.txt 
 
 echo "## Creating BigWig files"
 

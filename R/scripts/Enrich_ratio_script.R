@@ -1,8 +1,11 @@
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=1) {
-    stop("At least one arguments should be added", call.=FALSE)
-} 
+if (length(args) != 2) {
+    stop(
+        "Usage: Rscript Enrich_ratio_script.R <bed_file> <reference_path>",
+        call. = FALSE
+    )
+}
 
 `%ni%` <- Negate(`%in%`)
 
@@ -10,8 +13,10 @@ bed_sample <- args[1]
 
 target_path <- args[2]
 
-patient_sample <- unlist(lapply(stringr::str_split(bed_sample, "[.]"), "[[", 1))
-file_type <- unlist(lapply(stringr::str_split(bed_sample, "[.]"), "[[", 2))
+bname <- basename(bed_sample)
+
+patient_sample <- unlist(lapply(stringr::str_split(bname, "[.]"), "[[", 1))
+file_type <- unlist(lapply(stringr::str_split(bname, "[.]"), "[[", 2))
 
 if (file_type %ni% c("bed")) {
     stop("File should be .bed", call.=FALSE)
@@ -20,7 +25,7 @@ if (file_type %ni% c("bed")) {
 enrichment_ratio_file <- paste0(patient_sample, "_enrichment_ratio.txt")
 single_bp_file <- paste0(patient_sample, "_1bp.bed")
 
-root_path <- gsub(target_path,"bed/","")
+root_path <- dirname(dirname(bed_sample))
 
 #x name of .bed file of off-target or on-target bins returned by off_target_gr() or reduce_target_table()
 import_target <- function(x){
@@ -122,7 +127,7 @@ print("Writing cfChIP 1bp .bed file")
 
 write.table(single_bp, 
             file = paste0(root_path,
-                          "reduced_fragments/",
+                          "/reduced_fragments/",
                           single_bp_file), 
             sep = "\t",
             col.names = T)
@@ -134,7 +139,7 @@ print("Writing enrichment ratio file")
 
 write.table(res, 
             file = paste0(root_path,
-                          "enrichment_ratios/",
+                          "/enrichment_ratios/",
                           enrichment_ratio_file), 
             sep = "\t",
             col.names = T)

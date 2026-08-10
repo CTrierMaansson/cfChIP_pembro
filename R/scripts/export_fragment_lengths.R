@@ -12,7 +12,7 @@ library(data.table)
 #Defining the sizes of hg38 as well as relevant regions
 hg38_gr <- with(fread(white_list_path),
                 GRanges(V1,
-                        IRanges(V2,V3)))
+                        IRanges(1,V2)))
 param <- ScanBamParam(which = hg38_gr,
                       what = c("isize","pos"))
 

@@ -1,6 +1,7 @@
 args = commandArgs(trailingOnly=TRUE)
 
 library(data.table)
+library(dplyr)
 library(GenomicRanges)
 
 bam_file <- args[1]
@@ -24,7 +25,7 @@ extended_peaks <- peaks_gr+1000 #Adding 1kb to each side of the peaks to ensure 
 reduced_peaks <- reduce(extended_peaks)
 
 message("Reading hg38 chromosome sizes")
-hg38 <- fread(size_file)
+hg38 <- fread(size_file) 
 hg38_gr <- with(hg38,
                 GRanges(V1, 
                         IRanges(start = 1, 
