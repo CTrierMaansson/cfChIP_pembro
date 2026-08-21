@@ -13,19 +13,19 @@ This repository contains the analysis scripts and reference files used in the st
 ## Repository structure
 
 This repository contains the scripts and reference data used to generate the
-results for the manuscripts. 
+results for the manuscript. 
 
  - [bash/](bash/) - Scripts to generate data used for downstream analyses
  - [reference/](reference/) - Reference data generated or downloaded for the analyses 
  - [R/](R/) - R scripts and commonly used functions for analysis or to generate plots
- - [meta.rds](meta.rds) - metadata for cfChIP files and ctDNA information for samples
+ - [´meta.rds´](meta.rds) - metadata for cfChIP-seq files and ctDNA information for samples
 
 ## Requirements and environments
 The required software dependencies are specified in the corresponding 
 conda environment files:
 
-1. cfchip_pembro.yml - Main environment for raw data processing
-2. cfchip_ichor.yml - Environment to run IchorCNA on cfChIP-seq background reads
+1. ´cfchip_pembro.yml´ - Main environment for raw data processing
+2. ´cfchip_ichor.yml´ - Environment to run IchorCNA on cfChIP-seq background reads
 
 These environments can be installed using 
 
@@ -39,14 +39,24 @@ conda env create \
     -f /path/to/cfChIP_pembro/cfchip_ichor.yml
 ```
 
-The required R dependencies for downstream analysis
-are listed within each file in [R/](R/)
+Required R packages for downstream analyses are specified in the 
+corresponding R scripts in [R/](R/)
+
 
 ## Analysis workflow
 
+The analysis workflow consists of three primary processing steps: 
+(1) preprocessing of raw cfChIP-seq FASTQ files, including QC, alignment and filtering 
+(2) peak calling 
+(3) copy-number analysis using IchorCNA on background reads. 
+
+Subsequently, downstream statistical analyses and visualization 
+are performed using R.
+
 ### Preprocessing
 
-Three bash scripts are used to generate the files used for downstream analyses.
+Three bash scripts implement the primary cfChIP-seq processing workflow 
+and generate files used for downstream analyses.
 
 The first script, preprocessing.sh performs QC, alignment, filtering,
 and creates files needed for downstream analyses.
@@ -92,14 +102,14 @@ sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
 
 ### Downstream analysis
 
-[R/scripts/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/scripts/) contains helper R scripts called by the bash pipelines.
+[R/scripts/](R/scripts/) contains helper R scripts called by the bash pipelines.
 
-In addition, [R/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/) 
+In addition, [R/](R/) 
 contains three files containing the functions used for downstream data analysis:
 
- - [admin_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/admin_functions.R) - Definitions of variables and data formats
- - [analysis_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
- - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R) - Creation of plots based on results from analysis_functions.R
+ - [´admin_functions.R´](R/admin_functions.R) - Definitions of variables and data formats
+ - [´analysis_functions.R´](R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
+ - [´plot_functions.R´](R/plot_functions.R) - Creation of plots based on results from analysis_functions.R
  
 ## Output structure
 
@@ -121,7 +131,7 @@ path is /cfChIP_pembro/res/
     ├── coverage (Coverage relative to TSS)
     ├── enrichment_ratios (sample enrichment ratios)
     ├── fastqc (output of fastqc)
-    ├── fragment_lengths (fragmentlength distributions)
+    ├── fragment_lengths (fragment length distributions)
     ├── IchorCNA (CNA results from IchorCNA)
     │   ├── background_regions
     │   ├── results
@@ -138,8 +148,7 @@ path is /cfChIP_pembro/res/
 ```
 
 ## Data availability
-Raw sequencing data are not included in this repository. We are in process of 
-publishing the raw genome coverage profiles to [EGA](https://ega-archive.org/).
+Raw sequencing data are not included in this repository. Sequencing data are available through the  [European Genome-phenome Archive](https://ega-archive.org/) (EGA; accession: XXXX).
 The repository contains the analysis code and reference files required to 
 reproduce the processing and downstream analyses.
 
@@ -147,6 +156,6 @@ reproduce the processing and downstream analyses.
 
 If you use this repository or code in your research, please cite:
 
-Maansson CT, et al. Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer. 2026.
+Maansson CT, et al. Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer. 2026.(DOI: XXXX)
 
 
