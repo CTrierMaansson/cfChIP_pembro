@@ -6,9 +6,9 @@ By Christoffer Trier Maansson et al. (2026)
 
 ## Table of contents
 - [Environments](#Environments)
-- [Repository content](#Repository content)
+- [Repository content](#Repository-content)
 - [Code](#Code)
-- [Result directory structure](#Result directory structure)
+- [Result directory structure](#Result-directory-structure)
 
 ## Environments
 The data is analyzed using two conda environments
@@ -27,14 +27,14 @@ conda env create \
     -f /cfChIP_pembro/cfchip_ichor.yml
 ```
 
-## Content
+## Repository content
 
 This repository contains the scripts and reference data used to generate the
 results for the manuscripts. 
- - /cfChIP_pembro/bash/ - Scripts to generate data used for downstream analyses
- - /cfChIP_pembro/reference/ - Reference data generated or downloaded for the analyses 
- - /cfChIP_pembro/R/ - R scripts and commonly used functions for analysis or to generate plots
- - /cfChIP_pembro/meta.rds - metadata for cfChIP files and ctDNA information for samples
+ - [bash/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/bash/) - Scripts to generate data used for downstream analyses
+ - [reference/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/reference/) - Reference data generated or downloaded for the analyses 
+ - [R/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/) - R scripts and commonly used functions for analysis or to generate plots
+ - [meta.rds](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/meta.rds) - metadata for cfChIP files and ctDNA information for samples
 
 ## Code
 
@@ -83,14 +83,14 @@ sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
 
 ### R
 
-/cfChIP_pembro/R/scripts/ contain the R scripts used in the bash scripts above.
+[R/scripts/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/scripts/) contain the R scripts used in the bash scripts above.
 
-In addition, /cfChIP_pembro/R/ contains three files containing the functions
-used for downstream data analysis¨
+In addition, [R/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/) 
+contains three files containing the functions used for downstream data analysis:
 
  - [admin_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/admin_functions.R) - Definitions of variables and data formats
- - [analysis_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/analysis_functions.R)- Downstream analysis of data generated with preprocessing.sh
- - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R)- Creation of plots based results from analysis_functions.R
+ - [analysis_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
+ - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R) - Creation of plots based results from analysis_functions.R
 
 ## Result directory structure
 
