@@ -18,7 +18,7 @@ results for the manuscript.
  - [bash/](bash/) - Scripts to generate data used for downstream analyses
  - [reference/](reference/) - Reference data generated or downloaded for the analyses 
  - [R/](R/) - R scripts and commonly used functions for analysis or to generate plots
- - [´meta.rds´](meta.rds) - metadata for cfChIP-seq files and ctDNA information for samples
+ - [`meta.rds`](meta.rds) - metadata for cfChIP-seq files and ctDNA information for samples
 
 ## Requirements and environments
 The required software dependencies are specified in the corresponding 
@@ -46,7 +46,7 @@ and [HMFtools](https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.
 [IchorCNA](https://github.com/broadinstitute/ichorCNA) is required for copy-number analysis. 
 
 
-Required R packages for downstream analyses are specified in the 
+Required R packages for downstream analyses are specified in the
 corresponding R scripts in [R/](R/)
 
 ## Analysis workflow
@@ -61,12 +61,8 @@ are performed using R.
 
 ### Preprocessing
 
-Three bash scripts implement the primary cfChIP-seq processing workflow 
-and generate files used for downstream analyses.
-
-The first script, preprocessing.sh performs QC, alignment, filtering,
-and creates files needed for downstream analyses.
-
+The [`preprocessing.sh`](bash/preprocessing.sh) script performs QC, alignment, filtering,
+and other preprocessing steps required for downstream analyses:
 
 ```bash
 sbatch /cfChIP_pembro/bash/preprocessing.sh \
@@ -85,7 +81,7 @@ sbatch /cfChIP_pembro/bash/preprocessing.sh \
 
 ### Peak calling
 
-Peak calling is then performed using:
+Peak calling is then performed using [`peak_call.sh`](bash/peak_call.sh):
 
 ```bash
 sbatch /cfChIP_pembro/bash/peak_call.sh \
@@ -95,7 +91,8 @@ sbatch /cfChIP_pembro/bash/peak_call.sh \
 ```
 ### Copy-number analysis
 
-Finally, copy-number alterations are analyzed using IchorCNA on background reads
+Finally, copy-number alterations are analyzed using IchorCNA on background
+reads with [`run_IchorCNA.sh`](bash/run_IchorCNA.sh):
 
 ```bash
 sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
@@ -130,26 +127,26 @@ path is /cfChIP_pembro/res/
 │   └── scripts
 ├── reference
 └── res
-    ├── alignment (.sam and .bam files)
-    ├── bed (fragment .bed files)
-    ├── bedgraph (genome coverage profiles)
-    ├── bigwig (genome coverage profiles)
-    ├── coverage (Coverage relative to TSS)
-    ├── enrichment_ratios (sample enrichment ratios)
-    ├── fastqc (output of fastqc)
-    ├── fragment_lengths (fragment length distributions)
-    ├── IchorCNA (CNA results from IchorCNA)
+    ├── alignment   # SAM/BAM alignment files
+    ├── bed     # Fragment BED files
+    ├── bedgraph    # Genome coverage profiles
+    ├── bigwig  # Genome coverage profiles
+    ├── coverage    # Coverage relative to TSS
+    ├── enrichment_ratios   #Sample enrichment ratios
+    ├── fastqc  # Output of fastqc
+    ├── fragment_lengths    # Fragment length distributions
+    ├── IchorCNA    # CNA results from IchorCNA
     │   ├── background_regions
     │   ├── results
     │   │   └── D1
     │   └── wig
-    ├── macs (peak calling results)
+    ├── macs    # Peak calling results
     │   ├── annotated
     │   └── D1
-    ├── reduced_fragments (centered fragment .bed files)
-    ├── trimmed_fastqs (trimmed .fastq files)
+    ├── reduced_fragments   # Centered fragment .bed files
+    ├── trimmed_fastqs  #Trimmed .fastq files
     │   └── fastqc
-    └── umi_stats (stats from UMI deduplication)
+    └── umi_stats   #Stats from UMI deduplication
 
 ```
 
