@@ -39,9 +39,15 @@ conda env create \
     -f /path/to/cfChIP_pembro/cfchip_ichor.yml
 ```
 
+In addition to the conda environments, the preprocessing workflow requires 
+an indexed [hg38 reference genome](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/), 
+[fgbio](https://github.com/fulcrumgenomics/fgbio/releases), 
+and [HMFtools](https://github.com/hartwigmedical/hmftools/releases/tag/redux-v2.0).
+[IchorCNA](https://github.com/broadinstitute/ichorCNA) is required for copy-number analysis. 
+
+
 Required R packages for downstream analyses are specified in the 
 corresponding R scripts in [R/](R/)
-
 
 ## Analysis workflow
 
