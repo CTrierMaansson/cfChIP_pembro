@@ -1,52 +1,56 @@
 # cfChIP_pembro
 
-This repository contains the fundamental scripts associated with the manuscript entitled
-"Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer"
-By Christoffer Trier Maansson et al. (2026)
+This repository contains the analysis scripts and reference files used in the study “Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer.” The scripts implement the cfChIP-seq preprocessing, peak calling, copy-number analysis, and downstream statistical analyses described in the manuscript.
 
 ## Table of contents
-- [Environments](#Environments)
 - [Repository content](#Repository-content)
+- [Environments](#Environments)
 - [Code](#Code)
 - [Result directory structure](#Result-directory-structure)
 
-## Environments
-The data is analyzed using two conda environments
-1. cfchip_pembro - Main environment for raw data processing
-2. cfchip_ichor - Environment to run IchorCNA on cfChIP-seq background reads
-
-These environments can be installed using 
-
-```{bash}
-conda env create \
-    -n cfchip_pembro \
-    -f /cfChIP_pembro/cfchip_pembro.yml
-
-conda env create \
-    -n cfchip_ichor \
-    -f /cfChIP_pembro/cfchip_ichor.yml
-```
-
-## Repository content
+## Repository structure
 
 This repository contains the scripts and reference data used to generate the
 results for the manuscripts. 
- - [bash/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/bash/) - Scripts to generate data used for downstream analyses
- - [reference/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/reference/) - Reference data generated or downloaded for the analyses 
- - [R/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/) - R scripts and commonly used functions for analysis or to generate plots
- - [meta.rds](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/meta.rds) - metadata for cfChIP files and ctDNA information for samples
 
-## Code
+ - [bash/](bash/) - Scripts to generate data used for downstream analyses
+ - [reference/](reference/) - Reference data generated or downloaded for the analyses 
+ - [R/](R/) - R scripts and commonly used functions for analysis or to generate plots
+ - [meta.rds](meta.rds) - metadata for cfChIP files and ctDNA information for samples
 
-### bash scripts
+## Requirements and environments
+The required software dependencies are specified in the corresponding 
+conda environment files:
 
-Three bash scripts will create the files used for downstream analyses.
+1. cfchip_pembro.yml - Main environment for raw data processing
+2. cfchip_ichor.yml - Environment to run IchorCNA on cfChIP-seq background reads
+
+These environments can be installed using 
+
+```bash
+conda env create \
+    -n cfchip_pembro \
+    -f /path/to/cfChIP_pembro/cfchip_pembro.yml
+
+conda env create \
+    -n cfchip_ichor \
+    -f /path/to/cfChIP_pembro/cfchip_ichor.yml
+```
+
+The required R dependencies for downstream analysis
+are listed within each file in [R/](R/)
+
+## Analysis workflow
+
+### Preprocessing
+
+Three bash scripts are used to generate the files used for downstream analyses.
 
 The first script, preprocessing.sh performs QC, alignment, filtering,
 and creates files needed for downstream analyses.
 
 
-```{bash}
+```bash
 sbatch /cfChIP_pembro/bash/preprocessing.sh \
   -s <sample_name> \
   -o /output/path/ \
@@ -61,18 +65,21 @@ sbatch /cfChIP_pembro/bash/preprocessing.sh \
 
 ```
 
-Following this, the peak calling is performed using:
+### Peak calling
 
-```{bash}
+Peak calling is then performed using:
+
+```bash
 sbatch /cfChIP_pembro/bash/peak_call.sh \
   -s <sample_name> \
   -o /output/path/ \
   -R /path/to/cfChIP_pembro/R/scripts/ \
 ```
+### Copy-number analysis
 
-Lastly, Copy number alterations are analyzed using IchorCNA on background reads
+Finally, copy-number alterations are analyzed using IchorCNA on background reads
 
-```{bash}
+```bash
 sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
   -s <sample_name> \
   -o /output/path/ \
@@ -81,23 +88,23 @@ sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
   -I /path/to/IchorCNA/
 ```
 
-### R
+### Downstream analysis
 
-[R/scripts/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/scripts/) contain the R scripts used in the bash scripts above.
+[R/scripts/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/scripts/) contains helper R scripts called by the bash pipelines.
 
 In addition, [R/](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/) 
 contains three files containing the functions used for downstream data analysis:
 
  - [admin_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/admin_functions.R) - Definitions of variables and data formats
  - [analysis_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
- - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R) - Creation of plots based results from analysis_functions.R
-
-## Result directory structure
+ - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R) - Creation of plots based on results from analysis_functions.R
+ 
+## Output structure
 
 Example of output structure for a single sample (D1) where the output 
 path is /cfChIP_pembro/res/
 
-```{bash}
+```bash
 /cfChIP_pembro/
 ├── bash
 ├── logs
@@ -112,7 +119,7 @@ path is /cfChIP_pembro/res/
     ├── coverage (Coverage relative to TSS)
     ├── enrichment_ratios (sample enrichment ratios)
     ├── fastqc (output of fastqc)
-    ├── fragment_lengths (fragmentlength distrivutions)
+    ├── fragment_lengths (fragmentlength distributions)
     ├── IchorCNA (CNA results from IchorCNA)
     │   ├── background_regions
     │   ├── results
@@ -128,5 +135,16 @@ path is /cfChIP_pembro/res/
 
 ```
 
+## Data availability
+Raw sequencing data are not included in this repository. We are in process of 
+publishing the raw genome coverage profiles to [EGA](https://ega-archive.org/).
+The repository contains the analysis code and reference files required to 
+reproduce the processing and downstream analyses.
+
+## Citation
+
+If you use this repository or code in your research, please cite:
+
+Maansson CT, et al. Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer. 2026.
 
 
