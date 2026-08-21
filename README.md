@@ -3,10 +3,12 @@
 This repository contains the analysis scripts and reference files used in the study “Plasma histone modification profiling can infer transcriptional programs during immune checkpoint inhibitor therapy in non-small cell lung cancer.” The scripts implement the cfChIP-seq preprocessing, peak calling, copy-number analysis, and downstream statistical analyses described in the manuscript.
 
 ## Table of contents
-- [Repository content](#Repository-content)
-- [Environments](#Environments)
-- [Code](#Code)
-- [Result directory structure](#Result-directory-structure)
+- [Repository structure](#Repository-structure)
+- [Requirements and environments](#Requirements-and-environments)
+- [Analysis workflow](#Analysis-workflow)
+- [Output structure](#Output-structure)
+- [Data availability](#Data-availability)
+- [Citation](#Citation)
 
 ## Repository structure
 
