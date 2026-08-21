@@ -24,8 +24,8 @@ results for the manuscript.
 The required software dependencies are specified in the corresponding 
 conda environment files:
 
-1. ´cfchip_pembro.yml´ - Main environment for raw data processing
-2. ´cfchip_ichor.yml´ - Environment to run IchorCNA on cfChIP-seq background reads
+1. `cfchip_pembro.yml` - Main environment for raw data processing
+2. `cfchip_ichor.yml` - Environment to run IchorCNA on cfChIP-seq background reads
 
 These environments can be installed using 
 
@@ -107,9 +107,9 @@ sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
 In addition, [R/](R/) 
 contains three files containing the functions used for downstream data analysis:
 
- - [´admin_functions.R´](R/admin_functions.R) - Definitions of variables and data formats
- - [´analysis_functions.R´](R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
- - [´plot_functions.R´](R/plot_functions.R) - Creation of plots based on results from analysis_functions.R
+ - [`admin_functions.R`](R/admin_functions.R) - Definitions of variables and data formats
+ - [`analysis_functions.R`](R/analysis_functions.R) - Downstream analysis of data generated with preprocessing.sh
+ - [`plot_functions.R`](R/plot_functions.R) - Creation of plots based on results from analysis_functions.R
  
 ## Output structure
 
