@@ -32,7 +32,7 @@ This repository contains the scripts and reference data used to generate the
 results for the manuscripts. 
  - /cfChIP_pembro/bash/ - Scripts to generate data used for downstream analyses
  - /cfChIP_pembro/reference/ - Reference data generated or downloaded for the analyses 
- - /cfChIP_pembro/R/ - R scripts and commonly used functions used to generate plots
+ - /cfChIP_pembro/R/ - R scripts and commonly used functions for analysis or to generate plots
  - /cfChIP_pembro/meta.rds - metadata for cfChIP files and ctDNA information for samples
 
 ## Code
