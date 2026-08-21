@@ -6,8 +6,9 @@ By Christoffer Trier Maansson et al. (2026)
 
 ## Table of contents
 - [Environments](#Environments)
-- [Content](#Content)
+- [Repository content](#Repository content)
 - [Code](#Code)
+- [Result directory structure](#Result directory structure)
 
 ## Environments
 The data is analyzed using two conda environments
@@ -36,6 +37,8 @@ results for the manuscripts.
  - /cfChIP_pembro/meta.rds - metadata for cfChIP files and ctDNA information for samples
 
 ## Code
+
+### bash scripts
 
 Three bash scripts will create the files used for downstream analyses.
 
@@ -78,7 +81,18 @@ sbatch /cfChIP_pembro/bash/run_IchorCNA.sh \
   -I /path/to/IchorCNA/
 ```
 
-### Result directory structure
+### R
+
+/cfChIP_pembro/R/scripts/ contain the R scripts used in the bash scripts above.
+
+In addition, /cfChIP_pembro/R/ contains three files containing the functions
+used for downstream data analysis¨
+
+ - [admin_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/admin_functions.R) - Definitions of variables and data formats
+ - [analysis_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/analysis_functions.R)- Downstream analysis of data generated with preprocessing.sh
+ - [plot_functions.R](https://github.com/CTrierMaansson/cfChIP_pembro/blob/main/R/plot_functions.R)- Creation of plots based results from analysis_functions.R
+
+## Result directory structure
 
 Example of output structure for a single sample (D1) where the output 
 path is /cfChIP_pembro/res/
